@@ -413,7 +413,7 @@ public class AbstractOperationBasedList<E> implements MithraDelegatedList<E>, Se
 
     public MithraList resolveRelationship(DelegatingList<E> delegatingList, AbstractRelatedFinder finder)
     {
-        return finder.findManyWithMapper(delegatingList.getOperation());
+        return finder.findManyWithMapper(delegatingList);
     }
 
     public DelegatingList zCloneForRelationship(DelegatingList delegatingList)
@@ -552,5 +552,33 @@ public class AbstractOperationBasedList<E> implements MithraDelegatedList<E>, Se
     {
         throw new MithraBusinessException("Can't modify an operation based list.");
     }
+
+    @Override
+    public boolean attemptInMemoryResolve(DelegatingList<E> delegatingList)
+    {
+        if (!this.isOperationResolved(delegatingList))
+        {
+            synchronized (delegatingList)
+            {
+                if (!this.isOperationResolved(delegatingList)) // re-do under synchronized lock
+                {
+                    Operation originalOp = delegatingList.getOperation();
+                    CachedQuery resolved = originalOp.getResultObjectPortal().zFindInMemory(originalOp,
+                            delegatingList.getOrderBy());
+                    if (resolved != null)
+                    {
+                        delegatingList.zSetFastListOrCachedQuery(resolved);
+                        if (originalOp != resolved.getOperation())
+                        {
+                            delegatingList.zSetOperation(resolved.getOperation());
+                        }
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 
 }

@@ -17,17 +17,18 @@
 
 package com.gs.fw.common.mithra.list;
 
-import com.gs.collections.api.block.procedure.Procedure;
-import com.gs.collections.api.block.procedure.Procedure2;
-import com.gs.collections.api.block.procedure.primitive.ObjectIntProcedure;
 import com.gs.collections.impl.list.mutable.FastList;
+import com.gs.collections.impl.map.mutable.UnifiedMap;
 import com.gs.fw.common.mithra.*;
 import com.gs.fw.common.mithra.attribute.*;
 import com.gs.fw.common.mithra.cache.ExtractorBasedHashStrategy;
+import com.gs.fw.common.mithra.cache.FullUniqueIndex;
 import com.gs.fw.common.mithra.cache.Index;
 import com.gs.fw.common.mithra.extractor.EmbeddedValueExtractor;
 import com.gs.fw.common.mithra.finder.*;
+import com.gs.fw.common.mithra.finder.asofop.AsOfEqOperation;
 import com.gs.fw.common.mithra.notification.listener.MithraApplicationNotificationListener;
+import com.gs.fw.common.mithra.querycache.CachedQuery;
 import com.gs.fw.common.mithra.tempobject.TupleTempContext;
 import com.gs.fw.common.mithra.util.*;
 import com.gs.fw.finder.Navigation;
@@ -392,6 +393,10 @@ public abstract class DelegatingList<E> implements MithraList<E>
     public void setBypassCache(boolean bypassCache)
     {
         this.bypassCache = bypassCache;
+        if (bypassCache)
+        {
+            this.getDelegated().clearResolvedReferences(this);
+        }
     }
 
     public boolean isBypassCache()
@@ -1132,6 +1137,55 @@ public abstract class DelegatingList<E> implements MithraList<E>
     public Index zGetNotificationIndex()
     {
         return this.delegated.getInternalIndex(this);
+    }
+
+    public boolean zAttemptInMemoryResolve()
+    {
+        return !this.isBypassCache() && this.getDelegated().attemptInMemoryResolve(this);
+    }
+
+    public void zAttemptParentLoopResolve(DelegatingList parentList, AbstractRelatedFinder finder)
+    {
+        MithraObjectPortal portal = this.getOperation().getResultObjectPortal();
+        CachedQuery quickQuery = portal.zFindInMemory(this.getOperation(), this.getOrderBy());
+        if (!parentList.isEmpty() && quickQuery == null && !portal.isFullyCached())
+        {
+            Mapper mapper = finder.zGetMapper();
+            AsOfEqOperation[] defaultAsOfOps = mapper.getDefaultAsOfOperation(ListFactory.EMPTY_LIST);
+            Operation asOfOp = NoOperation.instance();
+            if (defaultAsOfOps != null)
+            {
+                asOfOp = defaultAsOfOps[0];
+                for (int i = 1; i < defaultAsOfOps.length; i++)
+                {
+                    asOfOp = asOfOp.and(defaultAsOfOps[i]);
+                }
+            }
+            Map<Attribute, Object> tempOperationPool = new UnifiedMap();
+            FullUniqueIndex index = new FullUniqueIndex(ExtractorBasedHashStrategy.IDENTITY_HASH_STRATEGY);
+            for (int i = 0; i < parentList.size(); i++)
+            {
+                Object from = parentList.get(i);
+                Operation op = mapper.getOperationFromOriginal(from, tempOperationPool);
+                op = op.and(asOfOp);
+                CachedQuery cachedQuery = op.getResultObjectPortal().zFindInMemory(op, null);
+                if (cachedQuery == null)
+                {
+                    return;
+                }
+                index.addAll(cachedQuery.getResult());
+            }
+            MithraFastList resolvedList = (MithraFastList) index.getAll();
+            com.gs.fw.common.mithra.finder.orderby.OrderBy orderBy = this.getOrderBy();
+            if (orderBy != null)
+            {
+                resolvedList.sortThis(orderBy);
+            }
+            CachedQuery resolved = new CachedQuery(this.getOperation(), orderBy);
+            resolved.setResult(resolvedList);
+            resolved.cacheQuery(true);
+            this.zSetFastListOrCachedQuery(resolved);
+        }
     }
 
     private static class ListOptions implements Serializable

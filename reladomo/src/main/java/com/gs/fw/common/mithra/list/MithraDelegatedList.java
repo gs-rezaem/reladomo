@@ -146,4 +146,8 @@ public interface MithraDelegatedList<E> extends Serializable
     public List<E> subList(DelegatingList<E> delegatingList, int fromIndex, int toIndex);
 
     public Iterator<E> iterator(DelegatingList<E> delegatingList);
+
+    public boolean attemptInMemoryResolve(DelegatingList<E> delegatingList);
+
+
 }

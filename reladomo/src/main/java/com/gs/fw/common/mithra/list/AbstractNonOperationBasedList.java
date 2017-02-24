@@ -25,6 +25,7 @@ import com.gs.fw.common.mithra.util.DoWhileProcedure;
 import com.gs.fw.common.mithra.util.Filter;
 import com.gs.fw.common.mithra.finder.orderby.OrderBy;
 import com.gs.fw.common.mithra.notification.listener.MithraApplicationNotificationListener;
+import com.gs.fw.finder.Navigation;
 
 import java.io.*;
 import java.util.*;
@@ -213,6 +214,7 @@ public class AbstractNonOperationBasedList<E> implements MithraDelegatedList<E>
 
     public MithraList resolveRelationship(DelegatingList<E> delegatingList, AbstractRelatedFinder finder)
     {
+        delegatingList.deepFetch((Navigation) finder);
         return this.getFastList(delegatingList).resolveRelationship(finder);
     }
 
@@ -350,4 +352,12 @@ public class AbstractNonOperationBasedList<E> implements MithraDelegatedList<E>
     {
         return this.getFastList(delegatingList).iterator();
     }
+
+    @Override
+    public boolean attemptInMemoryResolve(DelegatingList<E> delegatingList)
+    {
+        return true; // we're already resolved.
+    }
+
+
 }

@@ -25,6 +25,7 @@ import com.gs.fw.common.mithra.attribute.SourceAttributeType;
 import com.gs.fw.common.mithra.attribute.calculator.procedure.ObjectProcedure;
 import com.gs.fw.common.mithra.extractor.NormalAndListValueSelector;
 import com.gs.fw.common.mithra.finder.orderby.OrderBy;
+import com.gs.fw.common.mithra.list.DelegatingList;
 import com.gs.fw.common.mithra.notification.listener.MithraApplicationClassLevelNotificationListener;
 import com.gs.fw.common.mithra.tempobject.TupleTempContext;
 import org.slf4j.Logger;
@@ -278,6 +279,18 @@ public abstract class AbstractRelatedFinder<ReturnType, ParentOwnerType, ReturnO
     protected static Logger getLogger()
     {
         return logger;
+    }
+
+    public MithraList findManyWithMapper(DelegatingList parentList)
+    {
+        MithraList result = findManyWithMapper(parentList.getOperation());
+        result.setOrderBy(this.zGetOrderBy());
+        if (parentList.zAttemptInMemoryResolve())
+        {
+            ((DelegatingList)result).zAttemptParentLoopResolve(parentList, this);
+        }
+
+        return result;
     }
 
     public MithraList findManyWithMapper(Operation parentOp)

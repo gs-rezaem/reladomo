@@ -20,6 +20,7 @@ import com.gs.collections.impl.list.mutable.FastList;
 import com.gs.fw.common.mithra.cache.ConcurrentFullUniqueIndex;
 import com.gs.fw.common.mithra.extractor.Extractor;
 import com.gs.fw.common.mithra.util.InternalList;
+import com.gs.fw.common.mithra.util.ListFactory;
 import com.gs.fw.common.mithra.util.MithraFastList;
 import com.gs.fw.common.mithra.util.SmallSet;
 import org.slf4j.Logger;
@@ -108,7 +109,25 @@ public class ChainedMapper extends AbstractMapper
 
     public Operation getOperationFromOriginal(Object original, Map<Attribute, Object> tempOperationPool)
     {
-        throw new RuntimeException("not implemented");
+        Operation firstMapperOp = this.firstMapper.getOperationFromOriginal(original, tempOperationPool);
+
+        AsOfEqOperation[] defaultAsOfOperation = this.firstMapper.getDefaultAsOfOperation(ListFactory.EMPTY_LIST);
+        if (defaultAsOfOperation != null)
+        {
+            Operation newOp = firstMapperOp.zInsertAsOfEqOperationOnLeft(defaultAsOfOperation);
+            if (newOp == firstMapperOp)
+            {
+                for(AsOfEqOperation eqOp: defaultAsOfOperation)
+                {
+                    firstMapperOp = firstMapperOp.and(eqOp);
+                }
+            }
+            else
+            {
+                firstMapperOp = newOp;
+            }
+        }
+        return new MappedOperation(this.secondMapper, firstMapperOp);
     }
 
     @Override
@@ -230,7 +249,7 @@ public class ChainedMapper extends AbstractMapper
 
     public AsOfEqOperation[] getDefaultAsOfOperation(List<AsOfAttribute> ignore)
     {
-        throw new RuntimeException("should not get here");
+        return this.secondMapper.getDefaultAsOfOperation(ignore);
     }
 
     public Operation getOperationFromResult(Object result, Map<Attribute, Object> tempOperationPool)
