@@ -17,132 +17,78 @@
 package com.gs.fw.common.mithra.generator.filesystem;
 
 import java.io.*;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class PlainFile implements FauxFile
 {
-    private Path path;
+    private File file;
 
     public PlainFile(String path)
     {
-        this.path = FileSystems.getDefault().getPath(path);
+        this.file = new File(path);
     }
 
     public PlainFile(PlainFile parent, String path)
     {
-        this.path = parent.path.resolve(path);
+        this.file = new File(parent.file, path);
     }
 
     @Override
     public boolean exists()
     {
-        return Files.exists(this.path);
+        return this.file.exists();
     }
 
     @Override
     public String getName()
     {
-        return this.path.getName(this.path.getNameCount() - 1).toString();
+        return this.file.getName();
     }
 
     @Override
     public boolean mkdirs()
     {
-        try
-        {
-            return recursiveMkdirs(this.path);
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Could not create directory "+this.path.toString(), e);
-        }
-    }
-
-    private static boolean recursiveMkdirs(Path p) throws IOException
-    {
-        if (p != null && !Files.exists(p))
-        {
-            recursiveMkdirs(p.getParent());
-            Files.createDirectories(p);
-            return true;
-        }
-        return false;
+        return this.file.mkdirs();
     }
 
     @Override
     public long length()
     {
-        try
-        {
-            return Files.size(this.path);
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Could not get size of file "+this.path.toString(), e);
-        }
+        return this.file.length();
     }
 
     @Override
     public boolean canWrite()
     {
-        return Files.isWritable(this.path);
+        return this.file.canWrite();
     }
 
     @Override
     public boolean isDirectory()
     {
-        return Files.isDirectory(this.path);
+        return this.file.isDirectory();
     }
 
     @Override
-    public OutputStream newFileOutputStream() throws IOException
+    public FileOutputStream newFileOutputStream() throws IOException
     {
-        return Files.newOutputStream(this.path);
+        return new FileOutputStream(this.file);
     }
 
     @Override
-    public InputStream newFileInputStream() throws FileNotFoundException
+    public FileInputStream newFileInputStream() throws FileNotFoundException
     {
-        try
-        {
-            return Files.newInputStream(this.path);
-        }
-        catch(FileNotFoundException e)
-        {
-            throw e;
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Could not open file for reading "+path.toString(), e);
-        }
+        return new FileInputStream(this.file);
     }
 
     @Override
     public String getParent()
     {
-        return pathToString(this.path.getParent());
-    }
-
-    private static String pathToString(Path path)
-    {
-        int nameCount = path.getNameCount();
-        String result = path.getRoot() != null ? path.getRoot().toString() : "";
-        if (nameCount > 0)
-        {
-            result += path.getName(0).toString();
-        }
-        for(int i=1;i<nameCount;i++)
-        {
-            result += File.separator+path.getName(i).toString();
-        }
-        return result;
+        return this.file.getParent();
     }
 
     @Override
     public String getPath()
     {
-        return pathToString(this.path);
+        return this.file.getPath();
     }
 }
