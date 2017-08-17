@@ -1,0 +1,124 @@
+- projections:
+    - source of a projection:
+        - mithra list + attributes (not extractors: a custom extractor cannot be supported)
+            - calculated attributes are ok
+            - constants would be ok too, e.g. tacking on a last_update_time column populated from a constant
+            - can navigate via relationships
+            - to-one relationships should be trivial. null if not exists (aka outer join)? If somebody needs an inner-join, they should specify that as part of the query?
+            - navigating to-many relationship would imply carthesian join?
+        - aggregate query
+        - another projection
+        - tuple set
+    - destination of a projection:                                                                                                                                                                                   U
+        - nothing (aka virtual, or not-yet-materialized)
+        - a mithra object + attributes. Can't navigate relationships
+            - this implies an insert, which should be explicit in the method name.
+            - including a mithra temp object
+        - tuple
+            - this could be a virtual tuple set, or a materialized tuple list or set
+        - a bean
+            - this would mean reading it into memory
+        - a map
+            - this is a common pattern:
+                       UnifiedMap.<String, String>newMap().collectKeysAndValues(new ProdClassificationSynonymList(op), ProdClassificationSynonymFinder.stringSynonym(), ProdClassificationSynonymFinder.stringSynonym());
+    - the choice of uniqueing is always interesting. 
+        - tuple sets are already unique and the formal definition is also unique
+        - when the projection is used for an in-clause, it is by definition unique too
+        - we can occasionally deduce uniqueness and elide "distinct"
+    - use of projections:
+        - attribute.in(single-column-projection)
+        - attribute.notIn(single-column-projection)
+        - tuple.in(projection)
+        - tuple.notIn
+        - aggregation over a projection
+        - database side inserts
+    - a projection should be as lazy as possible, avoid retrieving the projection
+
+- Computed Attributes
+    - has to work in plain operations
+    - has to work in operations on a related object
+    - has to work in a relationship
+    - has to work in aggregation
+    - has to work in tuples
+    - has to work with different vendors the same
+    - (eventually) will have to work in projections
+    - all the above have to work correctly with sql, full cache and 3-tier
+    - design the computation mini-language
+        - mostly java like
+        - needs string functions (concat, substring, ...)
+        - needs arithmethic functions(+,-,*,/,abs, ...)
+        - needs date functions (year, month, day, hour, ..., dateWithoutTime, timeWithoutDate, ...)
+        - timezone conversion
+        - conversion from types (*->string, string->int, string->date, ...)
+        - case statement:
+            case 'Y','y','T','t': true
+            case 'N','n','F','f': false
+            default: false
+        - type inference gets pretty hairy.
+            - force the user to specify all types?
+            - int: no special designation, as well as "1234".asInteger()
+            - boolean: no special designation, as well as "true".asBoolean()
+            - string: in double quotes, "fred"
+            - date: "2012-07-07".asDate() ?
+            - timestamp: "2012-07-07 12:33:45.000".asTimestamp() ?
+            - double "-1.4567".asDouble() ?
+            - float "-1.4567".asFloat() ?
+            - long "-1323423423".asLong() ?
+        - parsing "." as a part of a number (double) or as method delimiter gets hairy.
+            - put doubles inside [] or use above?
+        - language:
+            - Expression with a Type
+            - Limited to a single expression
+            - Type := Integer | String | Date | Boolean
+            - Expression := AnyExpression (or informally: Attribute | Constant | Expression.Function(Expression...))
+            - Function := {source expression type, function name, List<parameter types>, return type}
+
+
+            - AnyExpression := StringExpression | IntegerExpression | DateExpression | BooleanExpression
+            - StringExpression := "null" | StringAttribute | StringConstant | StringExpression.StringStringFunction | AnyExpression.asString() | IntegerExpression.IntegerStringFunction | DateExpression.DateStringFunction
+            - IntegerExpression := IntegerAttribute | IntegerConstant | IntegerExpression.IntegerIntegerFunction() | StringExpression.StringIntegerFunction() | DateExpression.DateIntegerFunction()
+            - DateExpression := "null" | DateAttribute | DateConstant | StringExpression.StringDateFunction() | DateExpression.DateDateFunction()
+            - StringStringFunction := concat(StringExpression) | substring(IntegerConstant) | substring(IntegerConstant, IntegerConstant)
+            - StringIntegerFunction := asInteger() | asInteger(default) | length()
+            - IntegerStringFunction := asString()
+            - DateStringFunction := asString() | asString(StringConstant format)
+            - DateIntegerFunction := year() | month() | day() | hour() | minute() | second() | dateDiffAsDays(otherDate)
+            - parser limitations:
+                - can't use very long longs (StreamTokenizer parses to double): use a java constant for long longs.
+                - overloading is limited because the type of Java constants cannot be determined.
+                    - limit overloading to the method name + number of parameters, but not types
+        - test cases:
+            - FooStrAttribute.substring(2, 7) // lenient: means str.substring(Math.min(begin, str.length()), Math.min(end, str.length())) => returns empty is str is smaller than begin
+            - FooStrAttribute.concat("00")
+            - FooStrAttribute.concat(BarStrAttribute)
+            - FooStrAttribute.concat(BarStrAttribute).substring(8)
+            - FooStrAttribute.asInteger() // lenient: any non-integer value becomes Integer.MIN_VALUE
+            - FooIntAttribute.asString()
+            - FooStrAttribute.asInteger(-1) // any non-integer value becomes -1; is this easy in SQL?
+            - FooStrAttribute.concat(FooIntAttribute.asString())
+            - FooStrAttribute.case("Y","y","T","t" : true ; "N","n","F", "f" : false ; default : false)
+            - FooStrAttribute.case("TAMS" : BarStringAttribute.subString(8) ; default : null )
+            - possibly later: FooStrAttribute.case(BarStringAttribute.subString(8): "TAMS" ; default : null )
+            - FooDateAttribute.dateDiffAsDays(BarDateAttribute)
+            - fooIntAttribute.min(fooIntBarAttribute)
+            - "header".concat(fooStrAttribute)
+            - 1234.min(fooIntAttribute)
+            - "bar".concat(FooStAttribute)
+        - define the xml syntax. simple expressions should be like above.
+    - use the attribute in relationships
+        - e.g. Account8Digit.concat(AccountSubType) to a 10 digit account
+    - indexing and caching of the computed result will be interesting.
+        - should the xml allow the developer to choose between cached/noncached?
+    - implement the mini-language in both java and sql
+    - mini-language parser has to be able to decide if an expression is reversible.
+    - for reversible expressions:
+        - generate setter
+        - generate better sql by applying the reverse function, so that the database can use its index
+            - e.g. x is defined as y*2 (which is reversible)
+                FooFinder.x().eq(12) should be translated to FOO.Y = 6, instead of FOO.Y * 2 = 12
+            - certain date functions (year, dateWithoutTime) can be translated to range queries
+    - generator:
+        - add the attribute to the abstract class, finder, list
+    - sql: with the exception of reversals, it would follow the calculator framework.
+        - need a bunch of new calculators
+        - once calculators are defined, add them to the normal attributes as well.
