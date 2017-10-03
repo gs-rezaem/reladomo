@@ -146,12 +146,11 @@
                         a dated MithraObject, there will also be a functioning copy[Name]Until method provided.
                     </xsd:documentation></xsd:annotation>
                 </xsd:element>
-                <!--todo: computed attribute-->
-                <!--<xsd:element name="ComputedAttribute" type="ComputedAttributeType" minOccurs="0" maxOccurs="unbounded">-->
-                    <!--<xsd:annotation><xsd:documentation xml:lang="en">-->
-                            <!--A computed attribute is defined as a formula using other attributes of this object (but not relationships).-->
-                    <!--</xsd:documentation></xsd:annotation>-->
-                <!--</xsd:element>-->
+                <xsd:element name="ComputedAttribute" type="ComputedAttributeType" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:annotation><xsd:documentation xml:lang="en">
+                            A computed attribute is defined as a formula using other attributes of this object (but not relationships).
+                    </xsd:documentation></xsd:annotation>
+                </xsd:element>
                 <xsd:element name="TransactionalMethodSignature" type="TransactionalMethodSignatureType" minOccurs="0" maxOccurs="unbounded">
                     <xsd:annotation><xsd:documentation xml:lang="en">
                         A method on this object that is marked as transactional. The method signature shown here will be in the generated code

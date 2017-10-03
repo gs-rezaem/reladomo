@@ -33,8 +33,8 @@
     <Attribute name="state" javaType="String" columnName="STATE" maxLength="20"/>
     <Attribute name="trackingId" javaType="String" columnName="TRACKING_ID" maxLength="15"/>
     <!--todo: computed attribute-->
-    <!--<ComputedAttribute javaType="String" name="shortDescription">description.substring(1,4)</ComputedAttribute>-->
-    <!--<ComputedAttribute javaType="String" name="oneCharDescription">description.substring(1,4).substring(0,1)</ComputedAttribute>-->
+    <ComputedAttribute javaType="String" name="shortDescription">description.substring(1,4)</ComputedAttribute>
+    <ComputedAttribute javaType="String" name="oneCharDescription">description.substring(1,4).substring(0,1)</ComputedAttribute>
 
     <TransactionalMethodSignature>public void setUserIdAndDescription(int userId, String description) throws IllegalArgumentException</TransactionalMethodSignature>
     <TransactionalMethodSignature>public void cancel() throws IllegalArgumentException</TransactionalMethodSignature>

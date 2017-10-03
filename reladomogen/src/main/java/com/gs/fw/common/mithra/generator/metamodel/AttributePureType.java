@@ -22,6 +22,16 @@ public class AttributePureType
 {
     private String columnName;
 
+    public AttributePureType()
+    {
+    }
+
+    public AttributePureType(String name, String javaType)
+    {
+        this.setName(name);
+        this.setJavaType(javaType);
+    }
+
     public String getColumnName()
     {
         return columnName;

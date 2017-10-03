@@ -803,6 +803,7 @@ public class MithraObjectTypeWrapper extends MithraBaseObjectTypeWrapper
     {
         for(int i=0;i<computedAttributes.size();i++)
         {
+            computedAttributes.get(i).resolveAttributes(this, errors);
             verifyComputedAttributeDependency(computedAttributes.get(i), errors);
         }
     }
@@ -816,6 +817,7 @@ public class MithraObjectTypeWrapper extends MithraBaseObjectTypeWrapper
             {
                 errors.add("In object "+this.getClassName()+" computed attribute "+name+" has a circular dependency on itself");
             }
+            //todo: add circular dependency check on another computed attribute
             Attribute attributeByName = this.getAttributeByName(name);
             if (attributeByName == null)
             {
@@ -843,6 +845,7 @@ public class MithraObjectTypeWrapper extends MithraBaseObjectTypeWrapper
         for(int i=0;i<this.computedAttributes.size();i++)
         {
             this.computedAttributes.get(i).parseComputedAttribute(errors);
+            addAttribute(new ComputedAttribute(this, this.computedAttributes.get(i)));
         }
     }
 
