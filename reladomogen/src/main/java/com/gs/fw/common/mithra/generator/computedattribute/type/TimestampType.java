@@ -36,4 +36,16 @@ public class TimestampType implements Type
     {
         return this;
     }
+
+    @Override
+    public boolean isInteger()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean isString()
+    {
+        return false;
+    }
 }

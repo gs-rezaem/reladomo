@@ -34,5 +34,21 @@ public class BooleanExpression extends ConstantExpression
         return value;
     }
 
+    @Override
+    public String getNullGetterCalcExpression()
+    {
+        return "false";
+    }
 
+    @Override
+    public String getGetterCalcExpression()
+    {
+        return ""+value;
+    }
+
+    @Override
+    public String getPrintableForm()
+    {
+        return ""+value;
+    }
 }

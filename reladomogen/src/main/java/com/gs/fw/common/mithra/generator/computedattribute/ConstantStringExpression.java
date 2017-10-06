@@ -33,4 +33,26 @@ public class ConstantStringExpression extends ConstantExpression
     {
         return value;
     }
+
+    @Override
+    public String getNullGetterCalcExpression()
+    {
+        return value == null ? "true" : "false";
+    }
+
+    @Override
+    public String getGetterCalcExpression()
+    {
+        if (value == null)
+        {
+            return "null";
+        }
+        return '"'+value+'"';
+    }
+
+    @Override
+    public String getPrintableForm()
+    {
+        return value;
+    }
 }

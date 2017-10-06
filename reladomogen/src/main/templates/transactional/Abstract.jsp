@@ -21,6 +21,7 @@ under the License.
 <%
 	MithraObjectTypeWrapper wrapper = (MithraObjectTypeWrapper) request.getAttribute("mithraWrapper");
 	AbstractAttribute[] normalAttributes = wrapper.getSortedNormalAndSourceAttributes();
+	ComputedAttribute[] computedAttributes = wrapper.getSortedComputedAttributes();
     EmbeddedValue[] embeddedValueObjects = wrapper.getEmbeddedValueObjects();
     Attribute[] nullablePrimitiveAttributes = wrapper.getNullablePrimitiveAttributes();
     RelationshipAttribute[] relationshipAttributes = wrapper.getRelationshipAttributes();
@@ -384,6 +385,23 @@ public abstract class <%=wrapper.getAbstractClassName()%> extends com.gs.fw.comm
                  <% } %>
             <% } %>
     }
+    <%}%>
+
+    <% for (ComputedAttribute attribute : computedAttributes) { %>
+        <%= attribute.getVisibility() %> <%=attribute.isFinalGetter() ? "final " : ""%> boolean <%= attribute.getNullGetter() %>
+        {
+            <%=wrapper.getDataClassName()%> data = (<%=wrapper.getDataClassName()%>) this.zSynchronizedGetData();
+            return <%=attribute.getNullGetterCalcExpression()%>;
+        }
+
+        <%= attribute.getVisibility() %> <%=attribute.isFinalGetter() ? "final " : ""%><%=attribute.getTypeAsString()%> <%=attribute.getGetter()%>()
+        {
+            <%=wrapper.getDataClassName()%> data = (<%=wrapper.getDataClassName()%>) this.zSynchronizedGetData();
+            <%if(attribute.isNullablePrimitive()){%>
+            if (<%=attribute.getNullGetterCalcExpression()%>) MithraNullPrimitiveException.throwNew("<%=attribute.getName()%>", data);
+            <%}//nullable primitive%>
+            return <%=attribute.getGetterCalcExpression()%>;
+        }
     <%}%>
 
     <% for (EmbeddedValue evo : embeddedValueObjects) { %>

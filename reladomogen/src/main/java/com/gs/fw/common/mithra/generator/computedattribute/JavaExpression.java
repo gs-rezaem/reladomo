@@ -19,6 +19,7 @@ package com.gs.fw.common.mithra.generator.computedattribute;
 
 import com.gs.fw.common.mithra.generator.MithraObjectTypeWrapper;
 import com.gs.fw.common.mithra.generator.computedattribute.type.Type;
+import com.gs.fw.common.mithra.generator.metamodel.ComputedAttributeType;
 
 import java.util.List;
 import java.util.Set;
@@ -51,8 +52,26 @@ public class JavaExpression extends Expression
     }
 
     @Override
-    public void resolveAttributes(MithraObjectTypeWrapper wrapper, List<String> errors)
+    public void resolveAttributes(MithraObjectTypeWrapper wrapper, ComputedAttributeType computedAttributeType, List<String> errors)
     {
         //nothing to do
+    }
+
+    @Override
+    public String getNullGetterCalcExpression()
+    {
+        return "false";
+    }
+
+    @Override
+    public String getGetterCalcExpression()
+    {
+        return expression;
+    }
+
+    @Override
+    public String getPrintableForm()
+    {
+        return expression;
     }
 }

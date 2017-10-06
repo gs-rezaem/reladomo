@@ -25,4 +25,22 @@ public class NullExpression extends ConstantExpression
     {
         super(new NullType());
     }
+
+    @Override
+    public String getNullGetterCalcExpression()
+    {
+        return "true";
+    }
+
+    @Override
+    public String getGetterCalcExpression()
+    {
+        return "null";
+    }
+
+    @Override
+    public String getPrintableForm()
+    {
+        return "null";
+    }
 }

@@ -22,4 +22,8 @@ public interface Type
     boolean isCompatibleWith(Type type);
 
     Type computeMostCompatibleType(Type other);
+
+    boolean isInteger();
+
+    boolean isString();
 }

@@ -30,4 +30,19 @@ public class ComputedAttribute extends Attribute
         this.computedAttributeType = computedAttributeType;
     }
 
+    public String getNullGetterCalcExpression()
+    {
+        return this.computedAttributeType.getNullGetterCalcExpression();
+    }
+
+    public String getGetterCalcExpression()
+    {
+        return this.computedAttributeType.getGetterCalcExpression();
+    }
+
+    @Override
+    public boolean isComputed()
+    {
+        return true;
+    }
 }

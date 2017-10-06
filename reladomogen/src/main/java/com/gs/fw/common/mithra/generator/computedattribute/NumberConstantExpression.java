@@ -25,12 +25,30 @@ public class NumberConstantExpression extends ConstantExpression
 
     public NumberConstantExpression(double val)
     {
-        super(new NumberType());
+        super(NumberType.pickType(val));
         this.val = val;
     }
 
     public double getVal()
     {
         return val;
+    }
+
+    @Override
+    public String getNullGetterCalcExpression()
+    {
+        return "false";
+    }
+
+    @Override
+    public String getGetterCalcExpression()
+    {
+        return ((NumberType)this.getType()).getGetterCalcExpression(val);
+    }
+
+    @Override
+    public String getPrintableForm()
+    {
+        return getGetterCalcExpression();
     }
 }

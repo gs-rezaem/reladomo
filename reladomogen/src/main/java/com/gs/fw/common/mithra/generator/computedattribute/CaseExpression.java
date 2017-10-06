@@ -19,6 +19,7 @@ package com.gs.fw.common.mithra.generator.computedattribute;
 
 import com.gs.fw.common.mithra.generator.MithraObjectTypeWrapper;
 import com.gs.fw.common.mithra.generator.computedattribute.type.Type;
+import com.gs.fw.common.mithra.generator.metamodel.ComputedAttributeType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,12 +98,12 @@ public class CaseExpression extends Expression
     }
 
     @Override
-    public void resolveAttributes(MithraObjectTypeWrapper wrapper, List<String> errors)
+    public void resolveAttributes(MithraObjectTypeWrapper wrapper, ComputedAttributeType computedAttributeType, List<String> errors)
     {
-        this.sourceExpression.resolveAttributes(wrapper, errors);
+        this.sourceExpression.resolveAttributes(wrapper, computedAttributeType, errors);
         for(int i=0;i< fragments.size();i++)
         {
-            fragments.get(i).resolveAttributes(wrapper, errors);
+            fragments.get(i).resolveAttributes(wrapper, computedAttributeType, errors);
         }
     }
 
@@ -115,5 +116,23 @@ public class CaseExpression extends Expression
             valueType = valueType.computeMostCompatibleType(fragments.get(1).getValueType());
         }
         return valueType;
+    }
+
+    @Override
+    public String getNullGetterCalcExpression()
+    {
+        throw new RuntimeException("not implemented yet");
+    }
+
+    @Override
+    public String getGetterCalcExpression()
+    {
+        throw new RuntimeException("not implemented yet");
+    }
+
+    @Override
+    public String getPrintableForm()
+    {
+        return fragments.toString();
     }
 }

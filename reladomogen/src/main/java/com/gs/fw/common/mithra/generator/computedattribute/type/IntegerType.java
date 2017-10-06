@@ -36,4 +36,16 @@ public class IntegerType extends NumberType
         }
         return Integer.valueOf((int) Math.floor(n));
     }
+
+    @Override
+    public boolean isInteger()
+    {
+        return true;
+    }
+
+    @Override
+    public String getGetterCalcExpression(double val)
+    {
+        return ""+(int) val;
+    }
 }

@@ -52,7 +52,7 @@ public class MithraObjectTypeWrapper extends MithraBaseObjectTypeWrapper
 
     private List<RelationshipAttribute> relationshipAttributes = new ArrayList<RelationshipAttribute>();
     private List<Attribute> attributes;
-    private List<ComputedAttributeType> computedAttributes;
+    private List<ComputedAttributeType> computedAttributeTypes;
     private List<Attribute> inheritedAttributes;
     private List<AsOfAttribute> asOfAttributes;
     private List<Attribute> primaryKeyAttributes;
@@ -801,10 +801,10 @@ public class MithraObjectTypeWrapper extends MithraBaseObjectTypeWrapper
 
     private void validateComputedAttributes(List<String> errors)
     {
-        for(int i=0;i<computedAttributes.size();i++)
+        for(int i = 0; i< computedAttributeTypes.size(); i++)
         {
-            computedAttributes.get(i).resolveAttributes(this, errors);
-            verifyComputedAttributeDependency(computedAttributes.get(i), errors);
+            computedAttributeTypes.get(i).resolveAttributes(this, errors);
+            verifyComputedAttributeDependency(computedAttributeTypes.get(i), errors);
         }
     }
 
@@ -832,20 +832,20 @@ public class MithraObjectTypeWrapper extends MithraBaseObjectTypeWrapper
 
     private ComputedAttributeType getComputedAttributeByName(String name)
     {
-        for(int i=0;i<computedAttributes.size();i++)
+        for(int i = 0; i< computedAttributeTypes.size(); i++)
         {
-            if (computedAttributes.get(i).getName().equals(name)) return computedAttributes.get(i);
+            if (computedAttributeTypes.get(i).getName().equals(name)) return computedAttributeTypes.get(i);
         }
         return null;
     }
 
     private void extractComputedAttributes(List<String> errors)
     {
-        this.computedAttributes = this.getWrapped().getComputedAttributes();
-        for(int i=0;i<this.computedAttributes.size();i++)
+        this.computedAttributeTypes = this.getWrapped().getComputedAttributes();
+        for(int i = 0; i<this.computedAttributeTypes.size(); i++)
         {
-            this.computedAttributes.get(i).parseComputedAttribute(errors);
-            addAttribute(new ComputedAttribute(this, this.computedAttributes.get(i)));
+            this.computedAttributeTypes.get(i).parseComputedAttribute(errors);
+            addAttribute(new ComputedAttribute(this, this.computedAttributeTypes.get(i)));
         }
     }
 
@@ -2739,7 +2739,7 @@ public class MithraObjectTypeWrapper extends MithraBaseObjectTypeWrapper
 
     public Attribute[] getAttributesIncludingInheritedPks()
     {
-        ArrayList<Attribute> all = new ArrayList<Attribute>();
+        List all = new ArrayList<Attribute>();
         for(int i=0;i<this.primaryKeyAttributes.size();i++)
         {
             Attribute pkAttr = this.primaryKeyAttributes.get(i);
@@ -2748,9 +2748,10 @@ public class MithraObjectTypeWrapper extends MithraBaseObjectTypeWrapper
                 all.add(pkAttr);
             }
         }
-        all.addAll(this.attributes);
+        addNonComputedAttributes(all);
         Attribute[] result = new Attribute[all.size()];
-        return all.toArray(result);
+        all.toArray(result);
+        return result;
     }
 
     public Attribute[] getInheritedAttributes()
@@ -2899,7 +2900,7 @@ public class MithraObjectTypeWrapper extends MithraBaseObjectTypeWrapper
     public AbstractAttribute[] getNormalAndInheritedAttributes()
     {
         List<AbstractAttribute> attributes = new ArrayList<AbstractAttribute>();
-        attributes.addAll(this.attributes);
+        addNonComputedAttributes(attributes);
         for (int i = 0; i < this.inheritedAttributes.size(); i++)
         {
             AbstractAttribute inheritedAttribute = this.inheritedAttributes.get(i);
@@ -3414,7 +3415,7 @@ public class MithraObjectTypeWrapper extends MithraBaseObjectTypeWrapper
                 attributes.add(pkAttr);
             }
         }
-        attributes.addAll(this.attributes);
+        addNonComputedAttributes(attributes);
         AbstractAttribute[] result = new AbstractAttribute[attributes.size()];
         return attributes.toArray(result);
     }
@@ -3422,10 +3423,7 @@ public class MithraObjectTypeWrapper extends MithraBaseObjectTypeWrapper
     public AbstractAttribute[] getNormalAndSourceAttributes()
     {
         List<AbstractAttribute> attributes = new ArrayList<AbstractAttribute>();
-        if (this.attributes != null)
-        {
-            attributes.addAll(this.attributes);
-        }
+        addNonComputedAttributes(attributes);
         if (this.hasSourceAttribute())
         {
             attributes.add(this.getSourceAttribute());
@@ -3434,11 +3432,36 @@ public class MithraObjectTypeWrapper extends MithraBaseObjectTypeWrapper
         return attributes.toArray(result);
     }
 
+    private void addNonComputedAttributes(List<AbstractAttribute> attributes)
+    {
+        if (this.attributes != null)
+        {
+            for(int i=0;i<this.attributes.size();i++)
+            {
+                if (!this.attributes.get(i).isComputed())
+                {
+                    attributes.add(this.attributes.get(i));
+                }
+            }
+        }
+    }
+
     public AbstractAttribute[] getSortedNormalAndSourceAttributes()
     {
         AbstractAttribute[] attributes = this.getNormalAndSourceAttributes();
         Arrays.sort(attributes);
         return attributes;
+    }
+
+    public ComputedAttribute[] getSortedComputedAttributes()
+    {
+        ComputedAttribute[] result = new ComputedAttribute[this.computedAttributeTypes.size()];
+        for(int i=0;i<this.computedAttributeTypes.size();i++)
+        {
+            result[i] = new ComputedAttribute(this, computedAttributeTypes.get(i));
+        }
+        Arrays.sort(result);
+        return result;
     }
 
     public AsOfAttribute[] getAsOfAttributes()

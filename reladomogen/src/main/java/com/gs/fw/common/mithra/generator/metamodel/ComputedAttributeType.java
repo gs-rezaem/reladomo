@@ -38,7 +38,7 @@ public class ComputedAttributeType extends ComputedAttributeTypeAbstract
 
     public void resolveAttributes(MithraObjectTypeWrapper wrapper, List<String> errors)
     {
-        if (this.expression != null) this.expression.resolveAttributes(wrapper, errors);
+        if (this.expression != null) this.expression.resolveAttributes(wrapper, this, errors);
     }
 
     public Set<String> getAttributeList()
@@ -46,5 +46,15 @@ public class ComputedAttributeType extends ComputedAttributeTypeAbstract
         Set<String> result = new HashSet<String>();
         if (this.expression != null) this.expression.addAttributeList(result);
         return result;
+    }
+
+    public String getNullGetterCalcExpression()
+    {
+        return this.expression.getNullGetterCalcExpression();
+    }
+
+    public String getGetterCalcExpression()
+    {
+        return this.expression.getGetterCalcExpression();
     }
 }

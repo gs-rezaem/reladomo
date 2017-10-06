@@ -36,4 +36,16 @@ public class BooleanType implements Type
     {
         return this; // we checked for compatibility during parsing
     }
+
+    @Override
+    public boolean isInteger()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean isString()
+    {
+        return false;
+    }
 }

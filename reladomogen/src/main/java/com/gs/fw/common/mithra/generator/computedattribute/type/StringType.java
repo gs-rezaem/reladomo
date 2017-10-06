@@ -36,4 +36,16 @@ public class StringType implements Type
     {
         return this;
     }
+
+    @Override
+    public boolean isInteger()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean isString()
+    {
+        return true;
+    }
 }

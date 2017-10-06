@@ -17,9 +17,22 @@
 package com.gs.fw.common.mithra.generator.computedattribute.functiongen;
 
 
+import com.gs.fw.common.mithra.generator.MithraObjectTypeWrapper;
+import com.gs.fw.common.mithra.generator.computedattribute.FunctionExpression;
 import com.gs.fw.common.mithra.generator.computedattribute.type.Type;
+import com.gs.fw.common.mithra.generator.metamodel.ComputedAttributeType;
+
+import java.util.List;
 
 public interface FunctionGenerator
 {
     public Type getReturnType();
+
+    public void validateType(FunctionExpression functionExpression, MithraObjectTypeWrapper wrapper, ComputedAttributeType computedAttributeType, List<String> errors);
+
+    public void validateParameters(FunctionExpression functionExpression, MithraObjectTypeWrapper wrapper, ComputedAttributeType computedAttributeType, List<String> errors);
+
+    public String getNullGetterCalcExpression(FunctionExpression functionExpression);
+
+    public String getGetterCalcExpression(FunctionExpression functionExpression);
 }

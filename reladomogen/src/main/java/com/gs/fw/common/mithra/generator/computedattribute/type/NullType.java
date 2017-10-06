@@ -30,4 +30,16 @@ public class NullType implements Type
     {
         return other;
     }
+
+    @Override
+    public boolean isInteger()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean isString()
+    {
+        return false;
+    }
 }

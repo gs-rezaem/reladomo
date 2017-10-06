@@ -41,8 +41,8 @@ public class ExpressionEndState extends ComputedAttributeParserState
                 switch(nextToken)
                 {
                     case '.':
-                        Expression expression = stack.remove(stack.size() - 1);
-                        stack.add(new FunctionExpression(expression));
+//                        Expression expression = stack.remove(stack.size() - 1);
+//                        stack.add(new FunctionExpression(expression));
                         nextState = new FunctionBeginExpressionState(this.getParser());
                         break;
                     case ',':

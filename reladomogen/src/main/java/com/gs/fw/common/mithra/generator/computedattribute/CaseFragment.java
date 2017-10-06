@@ -22,6 +22,7 @@ import com.gs.fw.common.mithra.generator.computedattribute.type.BooleanType;
 import com.gs.fw.common.mithra.generator.computedattribute.type.NumberType;
 import com.gs.fw.common.mithra.generator.computedattribute.type.StringType;
 import com.gs.fw.common.mithra.generator.computedattribute.type.Type;
+import com.gs.fw.common.mithra.generator.metamodel.ComputedAttributeType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -136,9 +137,9 @@ public class CaseFragment
         this.value.addAttributeList(result);
     }
 
-    public void resolveAttributes(MithraObjectTypeWrapper wrapper, List<String> errors)
+    public void resolveAttributes(MithraObjectTypeWrapper wrapper, ComputedAttributeType computedAttributeType, List<String> errors)
     {
-        this.value.resolveAttributes(wrapper, errors);
+        this.value.resolveAttributes(wrapper, computedAttributeType, errors);
     }
 
     public Type getValueType()

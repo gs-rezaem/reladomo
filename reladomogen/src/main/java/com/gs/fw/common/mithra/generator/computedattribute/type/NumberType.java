@@ -35,4 +35,30 @@ public class NumberType implements Type
     {
         return this; //todo: resolve number types more specifically during parsing.
     }
+
+    @Override
+    public boolean isInteger()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean isString()
+    {
+        return false;
+    }
+
+    public static Type pickType(double val)
+    {
+        if (Math.floor(val) == val)
+        {
+            return new IntegerType();
+        }
+        return new DoubleType();
+    }
+
+    public String getGetterCalcExpression(double val)
+    {
+        return ""+val;
+    }
 }

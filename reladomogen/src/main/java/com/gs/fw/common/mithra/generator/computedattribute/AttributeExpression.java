@@ -21,6 +21,7 @@ import com.gs.fw.common.mithra.generator.AbstractAttribute;
 import com.gs.fw.common.mithra.generator.Attribute;
 import com.gs.fw.common.mithra.generator.MithraObjectTypeWrapper;
 import com.gs.fw.common.mithra.generator.computedattribute.type.Type;
+import com.gs.fw.common.mithra.generator.metamodel.ComputedAttributeType;
 
 import java.util.List;
 import java.util.Set;
@@ -47,7 +48,7 @@ public class AttributeExpression extends Expression
     }
 
     @Override
-    public void resolveAttributes(MithraObjectTypeWrapper wrapper, List<String> errors)
+    public void resolveAttributes(MithraObjectTypeWrapper wrapper, ComputedAttributeType computedAttributeType, List<String> errors)
     {
         Attribute attributeByName = wrapper.getAttributeByName(this.attributeName);
         if (attributeByName != null)
@@ -69,5 +70,27 @@ public class AttributeExpression extends Expression
             return this.singleColumnAttribute.getType().asComputedAttributeType();
         }
         return null;
+    }
+
+    @Override
+    public String getNullGetterCalcExpression()
+    {
+        if (singleColumnAttribute.isNullable())
+        {
+            return "data."+singleColumnAttribute.getNullGetter();
+        }
+        return "false";
+    }
+
+    @Override
+    public String getGetterCalcExpression()
+    {
+        return "data."+this.singleColumnAttribute.getGetter()+"()";
+    }
+
+    @Override
+    public String getPrintableForm()
+    {
+        return attributeName;
     }
 }

@@ -1619,4 +1619,9 @@ public abstract class AbstractAttribute implements CommonAttribute, Comparable
     {
         return this.getType().isBeanObjectType();
     }
+
+    public boolean isComputed()
+    {
+        return false;
+    }
 }

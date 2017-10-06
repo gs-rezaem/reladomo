@@ -145,4 +145,17 @@ public class SubstringCalculator implements StringAttributeCalculator
     {
         return 0x83AEF345 ^ this.attribute.hashCode();
     }
+
+    public static String safeSubstring(String src, int start, int end)
+    {
+        if (start >= src.length())
+        {
+            return "";
+        }
+        if (end > src.length())
+        {
+            end = src.length();
+        }
+        return src.substring(start, end);
+    }
 }

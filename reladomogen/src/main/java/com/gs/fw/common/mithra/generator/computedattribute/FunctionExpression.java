@@ -20,6 +20,7 @@ package com.gs.fw.common.mithra.generator.computedattribute;
 import com.gs.fw.common.mithra.generator.MithraObjectTypeWrapper;
 import com.gs.fw.common.mithra.generator.computedattribute.functiongen.FunctionGenerator;
 import com.gs.fw.common.mithra.generator.computedattribute.type.Type;
+import com.gs.fw.common.mithra.generator.metamodel.ComputedAttributeType;
 import com.gs.fw.common.mithra.generator.util.StringUtility;
 
 import java.util.ArrayList;
@@ -59,13 +60,13 @@ public class FunctionExpression extends Expression
     {
         try
         {
-            String className = "com.gs.fw.common.mithra.generator.functiongen"+
+            String className = "com.gs.fw.common.mithra.generator.computedattribute.functiongen."+
                     sourceExpression.getType().toString() + StringUtility.firstLetterToUpper(this.functionName) + "FuncGen";
             return (FunctionGenerator) Class.forName(className).newInstance();
         }
         catch (Exception e)
         {
-            errors.add("Could not find function with name "+this.functionName+"for type "+sourceExpression.getType());
+            errors.add("Could not find function with name "+this.functionName);
         }
         return null;
     }
@@ -111,13 +112,33 @@ public class FunctionExpression extends Expression
     }
 
     @Override
-    public void resolveAttributes(MithraObjectTypeWrapper wrapper, List<String> errors)
+    public void resolveAttributes(MithraObjectTypeWrapper wrapper, ComputedAttributeType computedAttributeType, List<String> errors)
     {
-        this.sourceExpression.resolveAttributes(wrapper, errors);
+        this.sourceExpression.resolveAttributes(wrapper, computedAttributeType, errors);
         for(int i=0;i<parameters.size();i++)
         {
-            parameters.get(i).resolveAttributes(wrapper, errors);
+            parameters.get(i).resolveAttributes(wrapper, computedAttributeType, errors);
         }
         this.functionGenerator = createFunctionGenerator(errors);
+        this.functionGenerator.validateType(this, wrapper, computedAttributeType, errors);
+        this.functionGenerator.validateParameters(this, wrapper, computedAttributeType, errors);
+    }
+
+    @Override
+    public String getNullGetterCalcExpression()
+    {
+        return functionGenerator.getNullGetterCalcExpression(this);
+    }
+
+    @Override
+    public String getGetterCalcExpression()
+    {
+        return functionGenerator.getGetterCalcExpression(this);
+    }
+
+    @Override
+    public String getPrintableForm()
+    {
+        return functionName;
     }
 }
