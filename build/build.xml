@@ -278,7 +278,6 @@
                 </classpath>
                 <jvmarg value="-server"/>
                 <jvmarg value="${jacocovmarg}${root}/reladomo/target/coverage/@{mithraxmlconfig}@{testclass}@{heap}.exec"/>
-                <jvmarg value="-XX:MaxPermSize=320m"/>
                 <jvmarg value="-Xmx3048m"/>
                 <jvmarg value="-ea"/>
                 <jvmarg value="-Dlog4j.configuration=file:${root}/reladomo/src/test/resources/log4jWarn.config"/>
@@ -1847,7 +1846,6 @@
                 </classpath>
                 <jvmarg value="-server"/>
                 <jvmarg value="${jacocovmarg}${root}/reladomo/target/coverage/@{mithraxmlconfig}@{testclass}@{heap}.exec"/>
-                <jvmarg value="-XX:MaxPermSize=320m"/>
                 <jvmarg value="-Xmx3048m"/>
                 <jvmarg value="-ea"/>
                 <jvmarg value="-Dlog4j.configuration=file:${root}/reladomo/src/test/resources/log4jWarn.config"/>
